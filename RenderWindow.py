@@ -2,26 +2,67 @@ from tkinter import *
 import time
 from MapLogic import *
 
-renderMap = Map([16,12],50)
-renderMap.generateRegions()
+renderMap = Map([12,10],80)
 
-gui = Tk()
-gui.geometry("800x600")
-gui.title("Pathfinder")
-canvas = Canvas(gui, width=800, height=600, bg='grey90')
-canvas.pack()
+obstacleList = []
 
+def toggleObstacles(event):
+  ref = renderMap.objCoordinateToRef([event.x,event.y])
+  if ref in obstacleList:
+    obstacleList.remove(ref)
+  else:
+    obstacleList.append(ref)
+  print("Position = ({0},{1})".format(event.x, event.y))
+
+def drawBox(event):
+  cor = renderMap.regionList[9].corners
+  #cor = renderMap.regionList[obstacleList[0]].corners
+  canvas.create_rectangle(cor[0] + cor[2], fill="black")
+
+def drawObstacles(event):
+  for obID in obstacleList:
+    renderMap.regionList[obID].traverse = False
+    canvas.create_rectangle([i * h for i in renderMap.regionList[obID].corners[0] + renderMap.regionList[obID].corners[2]], fill="grey20", outline="")
+    gui.update()
+    time.sleep(.05)
+
+
+for obID in obstacleList:
+  renderMap.regionList[obID].traverse = False
+
+X = renderMap.dim[0]*renderMap.div
+Y = renderMap.dim[1]*renderMap.div
 h = renderMap.div # Grid division width
 
-print(renderMap.regionList[5].corners)
+gui = Tk()
+gui.geometry(str(X) + "x" + str(Y))
+gui.title("Pathfinder")
+gui.bind("<Escape>", lambda x: gui.destroy())
+
+canvas = Canvas(gui, width=X, height=Y, bg='grey90')
+canvas.bind('<Button-1>', toggleObstacles)
+gui.bind("<Button-3>", drawBox)
+
+canvas.pack()
+
+
 
 # Creates vertical grid lines
-for i in range(0,800,h):
-  canvas.create_line(i,0,i,600, fill="grey80", width=2)
+for i in range(0,X,h):
+  canvas.create_line(i,0,i,Y, fill="grey80", width=2)
 
 # Creates horizontal grid lines
-for j in range(0,600,h):
-  canvas.create_line(0,j,800,j, fill="grey80", width=2)
+for j in range(0,Y,h):
+  canvas.create_line(0,j,X,j, fill="grey80", width=2)
+
+
+
+# Draws obstacles
+for reg in renderMap.regionList:
+  if not renderMap.regionList[reg].traverse:
+    canvas.create_rectangle([i * h for i in renderMap.regionList[reg].corners[0] + renderMap.regionList[reg].corners[2]], fill="grey20", outline="")
+
+
 
 #rect1 = canvas.create_rectangle(10,10, 150,150, fill="grey30", outline="")
 #poly1 = canvas.create_polygon([200,250, 220,260, 220,280, 300,255, 250,180], fill="grey30", outline="")
@@ -29,16 +70,31 @@ for j in range(0,600,h):
 #obstacle = canvas.create_polygon([2*h,2*h, 3*h,h, 5*h,h, 6*h,4*h, 4*h,5*h, 2*h,4*h], fill="grey30", outline="")
 
 bodyR = 5*h/18 # Radius of the "creatures" body
-bodyPos = [1.5*h, 2.5*h]
 
-creatureBodyOuter = canvas.create_oval(bodyPos[0]-bodyR, bodyPos[1]-bodyR, bodyPos[0]+bodyR, bodyPos[1]+bodyR, fill="red", outline="")
+initReg = renderMap.regionList[ 2 ]
+termReg = renderMap.regionList[ 30 ]
+
+start = canvas.create_rectangle([i * h for i in initReg.corners[0] + initReg.corners[2]], fill="pale green", outline="green")
+end = canvas.create_rectangle([i * h for i in termReg.corners[0] + termReg.corners[2]], fill="IndianRed1", outline="red")
+
+bodyPos = [initReg.centre[0]*h, initReg.centre[1]*h]
+
+creatureBodyOuter = canvas.create_oval(bodyPos[0]-bodyR, bodyPos[1]-bodyR, bodyPos[0]+bodyR, bodyPos[1]+bodyR, fill="orange red", outline="")
 creatureBodyInner = canvas.create_oval(bodyPos[0]-4*bodyR/5, bodyPos[1]-4*bodyR/5, bodyPos[0]+4*bodyR/5, bodyPos[1]+4*bodyR/5, fill="LightSalmon", outline="")
 
-test1 = canvas.create_line(renderMap.regionList[4].centre[0]*h,renderMap.regionList[4].centre[1]*h,renderMap.regionList[5].centre[0]*h,renderMap.regionList[5].centre[1]*h, width=5)
+vec = Region.disVector(initReg,termReg)
+print(Region.disMetric(initReg,termReg))
+steps = math.floor(100/Region.disMetric(initReg,termReg))
 
-test2 = canvas.create_line(renderMap.regionList[2].centre[0]*h,renderMap.regionList[2].centre[1]*h,renderMap.regionList[100].centre[0]*h,renderMap.regionList[100].centre[1]*h, width=5)
+for n in range(steps):
+  canvas.move(creatureBodyOuter, h*vec[0]/steps, h*vec[1]/steps)
+  canvas.move(creatureBodyInner, h*vec[0]/steps, h*vec[1]/steps)
+  gui.update()
+  time.sleep(.05)
 
-print(renderMap.regionList[4].centre)
-print(renderMap.regionList[5].centre)
+print(obstacleList)
+
+gui.update()
+time.sleep(.05)
 
 gui.mainloop()
