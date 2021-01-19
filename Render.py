@@ -10,11 +10,6 @@ h = renderMap.div # Grid division width
 
 drawnObstacles = {}
 
-def draw(event):
-  x1, y1 = ( event.x - 1 ), ( event.y - 1 )
-  x2, y2 = ( event.x + 1 ), ( event.y + 1 )
-  canvas.create_oval( x1, y1, x2, y2, fill = "green" )
-
 def toggleObstacle(event):
   reg = renderMap.regionList[renderMap.objCoordinateToRef([event.x,event.y])]
   if reg.ref in drawnObstacles:
@@ -44,9 +39,5 @@ for i in range(0,X,h):
 # Creates horizontal grid lines
 for j in range(0,Y,h):
   canvas.create_line(0,j,X,j, fill="grey80", width=2)
-
-
-
-
 
 gui.mainloop()

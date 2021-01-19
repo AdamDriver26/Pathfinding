@@ -48,4 +48,45 @@ class Map:
   def objCoordinateToRef(self,pos):
     return self.dim[0]*(pos[1]//self.div) + (pos[0]//self.div) + 1
 
+  def neighbours(self, ref):
+    neighboursList = []
+    if ref % self.dim[0] == 0:                  # Checks that the region is in the Eastern column
+
+      if ref != self.dim[0]:                       # Checks that the province is not the North Eastern corner
+        neighboursList.append(ref - self.dim[0])   # Adds the Northern region reference
+
+      if ref != self.dim[0]*self.dim[1]:           # Checks that the province is not the South Eastern corner
+        neighboursList.append(ref + self.dim[0])   # Adds the Southern region reference 
+
+      neighboursList.append(ref - 1)               # Adds the Western region reference    
+
+    elif ref % self.dim[0] == 1:                # Checks that the region is in the Western column
+      
+      if ref != 1:                                 # Checks that the province is not the North Western corner
+        neighboursList.append(ref - self.dim[0])   # Adds the Northern region reference
+
+      if ref != self.dim[0]*(self.dim[1] - 1) + 1: # Checks that the province is not the South Western corner
+        neighboursList.append(ref + self.dim[0])   # Adds the Southern region reference 
+
+      neighboursList.append(ref + 1)               # Adds the Eastern region reference  
+
+    else:                                           # The remaining regions are in the center columns
+
+      if ref > self.dim[0]:                          # Checks that the region is not in the Northern row
+        neighboursList.append(ref - self.dim[0])     # Adds the Northern region reference 
+
+      if ref < self.dim[0]*(self.dim[1] - 1):        # Checks that the region is not in the Southern row
+        neighboursList.append(ref + self.dim[0])     # Adds the Southern region reference 
+
+      neighboursList.append(ref + 1)              # Adds the Eastern region reference 
+      neighboursList.append(ref - 1)              # Adds the Western region reference
+
+    return sorted(neighboursList)
+
+testMap = Map([8,8],50)
+print(len(testMap.regionList))
+#print( testMap.neighbours(testMap.regionList(5)) )
+
+print( testMap.neighbours(  17  ) )
+
 
