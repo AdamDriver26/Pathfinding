@@ -83,10 +83,6 @@ class Map:
 
     return sorted(neighboursList)
 
-testMap = Map([8,8],50)
-print(len(testMap.regionList))
-#print( testMap.neighbours(testMap.regionList(5)) )
 
-print( testMap.neighbours(  17  ) )
 
 
